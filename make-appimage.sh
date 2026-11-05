@@ -3,16 +3,17 @@
 set -eu
 
 ARCH=$(uname -m)
-VERSION=$(pacman -Q PACKAGENAME | awk '{print $2; exit}') # example command to get version of application here
-export ARCH VERSION
+export ARCH
 export OUTPATH=./dist
 export ADD_HOOKS="self-updater.hook"
 export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*$ARCH.AppImage.zsync"
-export ICON=./AppDir/.DirIcon/org.squidowl.halloy.png
-export DESKTOP=./AppDir/org.squidowl.halloy.desktop
+export ICON=./halloy/share/icons/hicolor/512x512/apps/org.squidowl.halloy.png
+export DESKTOP=./halloy/share/applications/org.squidowl.halloy.desktop
+export DEPLOY_OPENGL=1
+export DEPLOY_VULKAN=1
 
 # Deploy dependencies
-quick-sharun ./AppDir/
+quick-sharun ./halloy/bin/halloy
 
 # Additional changes can be done in between here
 

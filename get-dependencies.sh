@@ -4,26 +4,44 @@ set -eu
 
 ARCH=$(uname -m)
 
-echo "Downloading and extracting Halloy assets..."
+# halloy only ships Linux binaries for x86_64
+if [ "$ARCH" != "x86_64" ]; then
+	echo "ERROR: halloy does not provide Linux binaries for $ARCH" >&2
+	exit 1
+fi
+
+if [ "${DEVEL_RELEASE-}" = 1 ]; then
+	VERSION=nightly
+else
+	VERSION=$(curl -sIL -o /dev/null -w '%{url_effective}' \
+		"https://github.com/squidowl/halloy/releases/latest" | sed 's|.*/tag/||')
+fi
+
+if [ -z "$VERSION" ]; then
+	echo "ERROR: Unable to determine the version of halloy" >&2
+	exit 1
+fi
+echo "$VERSION" > ~/version
+
+echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
+pacman -Syu --noconfirm \
+	alsa-lib            \
+	libxcb              \
+	libxkbcommon        \
+	libxkbcommon-x11    \
+	vulkan-icd-loader
 
-TAR_LINK=$(curl -s "https://api.github.com/repos/squidowl/halloy/releases/latest" | 
-           jq -r '.assets[] | select(.name | endswith("-x86_64-linux.tar.gz")) | .browser_download_url' | 
-           head -n 1)
+echo "Installing debloated packages..."
+echo "---------------------------------------------------------------"
+get-debloated-pkgs --add-mesa --prefer-nano
 
-if wget --retry-connrefused --tries=30 "$TAR_LINK" -O halloy_latest.tar.gz 2>/tmp/download.log; then
-    tar -xvf halloy_latest.tar.gz
-    rm -f halloy_latest.tar.gz
+echo "Downloading halloy ${VERSION}..."
+echo "---------------------------------------------------------------"
+wget --retry-connrefused --tries=30 \
+	"https://github.com/squidowl/halloy/releases/download/${VERSION}/halloy-${VERSION}-x86_64-linux.tar.gz" \
+	-O ./halloy.tar.gz
 
-    mkdir -p ./AppDir/bin
-    mkdir -p ./AppDir/.DirIcon
-
-    mv ./tmp_extract/bin/halloy ./AppDir/bin/halloy
-
-    cp /share/icons/hicolor/512x512/apps/org.squidowl.halloy.png ./AppDir/.DirIcon/org.squidowl.halloy.png
-
-    mv ./tmp_extract/share/applications/org.squidowl.halloy.desktop ./AppDir/org.squidowl.halloy.desktop
-
-    echo "Installing debloated packages..."
-    echo "---------------------------------------------------------------"
-    get-debloated-pkgs --add-common --prefer-nano
+mkdir -p ./halloy
+tar -xvf ./halloy.tar.gz -C ./halloy
+rm -f ./halloy.tar.gz
