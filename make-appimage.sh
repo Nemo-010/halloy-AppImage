@@ -20,6 +20,7 @@ quick-sharun ./halloy/bin/halloy
 # Turn AppDir into AppImage
 quick-sharun --make-appimage
 
-# Test the app for 12 seconds, if the test fails due to the app
-# having issues running in the CI use --simple-test instead
-quick-sharun --test ./dist/*.AppImage
+# The full test needs a GPU: halloy renders through wgpu and its GL fallback
+# rejects the software renderer used in CI, so only check the AppImage starts
+# and that its libraries are all in place
+quick-sharun --simple-test ./dist/*.AppImage

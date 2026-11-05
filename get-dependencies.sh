@@ -25,9 +25,13 @@ echo "$VERSION" > ~/version
 
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
+# winit dlopens these from the X11 backend, so they must be present here
+# for quick-sharun to find and deploy them
 pacman -Syu --noconfirm \
 	alsa-lib            \
 	libxcb              \
+	libxcursor          \
+	libxinerama         \
 	libxkbcommon        \
 	libxkbcommon-x11    \
 	vulkan-icd-loader
