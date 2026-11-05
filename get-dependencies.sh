@@ -4,26 +4,26 @@ set -eu
 
 ARCH=$(uname -m)
 
-echo "Installing package dependencies..."
+echo "Downloading and extracting Halloy assets..."
 echo "---------------------------------------------------------------"
-# pacman -Syu --noconfirm PACKAGESHERE
 
-echo "Installing debloated packages..."
-echo "---------------------------------------------------------------"
-get-debloated-pkgs --add-common --prefer-nano
+TAR_LINK=$(curl -s "https://api.github.com/repos/squidowl/halloy/releases/latest" | 
+           jq -r '.assets[] | select(.name | endswith("-x86_64-linux.tar.gz")) | .browser_download_url' | 
+           head -n 1)
 
-# Comment this out if you need an AUR package
-#make-aur-package PACKAGENAME
+if wget --retry-connrefused --tries=30 "$TAR_LINK" -O halloy_latest.tar.gz 2>/tmp/download.log; then
+    tar -xvf halloy_latest.tar.gz
+    rm -f halloy_latest.tar.gz
 
-# If the application needs to be manually built that has to be done down here
+    mkdir -p ./AppDir/bin
+    mkdir -p ./AppDir/.DirIcon
 
-# if you also have to make nightly releases check for DEVEL_RELEASE = 1
-#
-# if [ "${DEVEL_RELEASE-}" = 1 ]; then
-# 	nightly build steps
-# else
-# 	regular build steps
-# fi
+    mv ./tmp_extract/bin/halloy ./AppDir/bin/halloy
 
-# Note that when building manually, you want to output the version of the
-# application to a ~/version file and remove VERSION from make-appimage.sh
+    cp /share/icons/hicolor/512x512/apps/org.squidowl.halloy.png ./AppDir/.DirIcon/org.squidowl.halloy.png
+
+    mv ./tmp_extract/share/applications/org.squidowl.halloy.desktop ./AppDir/org.squidowl.halloy.desktop
+
+    echo "Installing debloated packages..."
+    echo "---------------------------------------------------------------"
+    get-debloated-pkgs --add-common --prefer-nano
