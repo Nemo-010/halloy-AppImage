@@ -11,6 +11,9 @@ export ICON=./halloy/share/icons/hicolor/512x512/apps/org.squidowl.halloy.png
 export DESKTOP=./halloy/share/applications/org.squidowl.halloy.desktop
 export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
+# the only datadir quick-sharun matches here is /usr/share/groff, because the
+# string "groff" shows up in halloy's MIME type list, so skip datadir scanning
+export DEPLOY_DATADIR=0
 
 # Deploy dependencies
 quick-sharun ./halloy/bin/halloy
