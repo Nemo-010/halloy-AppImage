@@ -26,10 +26,10 @@ echo "$VERSION" > ~/version
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
 # winit dlopens these from the X11 backend, so they must be present here
-# for quick-sharun to find and deploy them
+# for quick-sharun to find and deploy them. alsa-lib and libxcb are not
+# needed here, the setup action already installs them (pulseaudio-alsa and
+# libx11) and quick-sharun aborts if a linked library is missing anyway.
 pacman -Syu --noconfirm \
-	alsa-lib            \
-	libxcb              \
 	libxcursor          \
 	libxinerama         \
 	libxkbcommon        \
